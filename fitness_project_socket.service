@@ -1,0 +1,11 @@
+[Unit]
+Description=Fitness Project socket
+
+[Socket]
+ListenStream=/run/fitness_project.sock
+User=www-data
+Group=www-data
+Mode=0660
+
+[Install]
+WantedBy=sockets.target 

@@ -1,0 +1,19 @@
+[Unit]
+Description=Fitness Project Gunicorn daemon
+Requires=fitness_project.socket
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+RuntimeDirectory=fitness_project
+WorkingDirectory=/var/www/fitness_project
+ExecStart=/var/www/fitness_project/venv/bin/gunicorn --config /var/www/fitness_project/gunicorn.conf.py fitness_project.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target 

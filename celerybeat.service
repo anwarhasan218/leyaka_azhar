@@ -1,0 +1,20 @@
+[Unit]
+Description=Celery Beat Service for Fitness Project
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+EnvironmentFile=/var/www/fitness_project/.env
+WorkingDirectory=/var/www/fitness_project
+ExecStart=/var/www/fitness_project/venv/bin/celery -A fitness_project.celery beat \
+    --loglevel=INFO \
+    --logfile=/var/log/celery/beat.log \
+    --pidfile=/var/run/celery/beat.pid
+ExecStop=/bin/kill -TERM $MAINPID
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target 
