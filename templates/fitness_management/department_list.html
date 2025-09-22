@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}قائمة الإدارات - المشروع القومي للياقة البدنية{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                <i class="fas fa-building me-2"></i>قائمة الإدارات
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.userprofile.user_type == 'super_admin' or user.userprofile.user_type == 'region_admin' %}
+            <a href="{% url 'fitness_management:add_department' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>إضافة إدارة
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Departments Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-table me-2"></i>الإدارات ({{ departments.count }})
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if departments %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>اسم الإدارة</th>
+                            <th>المنطقة</th>
+                            <th>رمز الإدارة</th>
+                            <th>عدد المعاهد</th>
+                            <th>عدد الطلاب</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for department in departments %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-building text-primary me-2"></i>
+                                    {{ department.name }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ department.region.name }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ department.code }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">{{ department.institute_set.count }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-warning">
+                                    {% with total_students=0 %}
+                                        {% for inst in department.institute_set.all %}
+                                            {% with total_students=total_students|add:inst.student_set.count %}{% endwith %}
+                                        {% endfor %}
+                                        {{ total_students }}
+                                    {% endwith %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    {% if user.userprofile.user_type == 'super_admin' or department.region == user.userprofile.region %}
+                                    <a href="{% url 'fitness_management:edit_department' department.id %}" 
+                                       class="btn btn-sm btn-warning" title="تعديل الإدارة">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'fitness_management:delete_department' department.id %}" 
+                                       class="btn btn-sm btn-danger" title="حذف الإدارة"
+                                       onclick="return confirm('هل أنت متأكد من حذف هذه الإدارة؟')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-building fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">لا توجد إدارات</h5>
+                <p class="text-muted">لم يتم العثور على إدارات</p>
+                {% if user.userprofile.user_type == 'super_admin' or user.userprofile.user_type == 'region_admin' %}
+                <a href="{% url 'fitness_management:add_department' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>إضافة أول إدارة
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}قائمة الطلاب - المشروع القومي للياقة البدنية{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                <i class="fas fa-users me-2"></i>قائمة الطلاب
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'fitness_management:add_student' %}" class="btn btn-primary">
+                <i class="fas fa-user-plus me-2"></i>إضافة طالب
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="search" class="form-label">البحث</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ search }}" placeholder="اسم الطالب أو الرقم القومي">
+                </div>
+                <div class="col-md-3">
+                    <label for="gender" class="form-label">النوع</label>
+                    <select class="form-control" id="gender" name="gender">
+                        <option value="">الكل</option>
+                        <option value="male" {% if gender == 'male' %}selected{% endif %}>بنين</option>
+                        <option value="female" {% if gender == 'female' %}selected{% endif %}>فتيات</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="education_level" class="form-label">المرحلة</label>
+                    <select class="form-control" id="education_level" name="education_level">
+                        <option value="">الكل</option>
+                        <option value="primary" {% if education_level == 'primary' %}selected{% endif %}>ابتدائي</option>
+                        <option value="middle" {% if education_level == 'middle' %}selected{% endif %}>إعدادي</option>
+                        <option value="secondary" {% if education_level == 'secondary' %}selected{% endif %}>ثانوي</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i>بحث
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Students Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-table me-2"></i>الطلاب ({{ page_obj.paginator.count }})
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if page_obj %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>الرقم القومي</th>
+                            <th>النوع</th>
+                            <th>المرحلة</th>
+                            <th>الصف</th>
+                            <th>المعهد</th>
+                            <th>تاريخ التسجيل</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in page_obj %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if student.personal_photo %}
+                                    <img src="{{ student.personal_photo.url }}" 
+                                         alt="{{ student.name }}" 
+                                         class="rounded-circle me-2" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                    {% endif %}
+                                    {{ student.name }}
+                                </div>
+                            </td>
+                            <td>{{ student.national_id }}</td>
+                            <td>
+                                <span class="badge {% if student.gender == 'male' %}bg-primary{% else %}bg-pink{% endif %}">
+                                    {{ student.get_gender_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ student.get_education_level_display }}
+                                </span>
+                            </td>
+                            <td>{{ student.grade }}</td>
+                            <td>{{ student.institute.name }}</td>
+                            <td>{{ student.created_at|date:"Y/m/d" }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'fitness_management:student_detail' student.id %}" 
+                                       class="btn btn-sm btn-primary" title="عرض التفاصيل">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if user.userprofile.user_type == 'super_admin' or student.institute.department.region == user.userprofile.region or student.institute.department == user.userprofile.department or student.institute == user.userprofile.institute %}
+                                    <a href="{% url 'fitness_management:add_student_test' student.id %}" 
+                                       class="btn btn-sm btn-success" title="إضافة اختبار">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                    <a href="{% url 'fitness_management:edit_student' student.id %}" 
+                                       class="btn btn-sm btn-warning" title="تعديل الطالب">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'fitness_management:delete_student' student.id %}" 
+                                       class="btn btn-sm btn-danger" title="حذف الطالب"
+                                       onclick="return confirm('هل أنت متأكد من حذف هذا الطالب؟')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="صفحات الطلاب">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if gender %}&gender={{ gender }}{% endif %}{% if education_level %}&education_level={{ education_level }}{% endif %}">
+                            السابق
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if gender %}&gender={{ gender }}{% endif %}{% if education_level %}&education_level={{ education_level }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if gender %}&gender={{ gender }}{% endif %}{% if education_level %}&education_level={{ education_level }}{% endif %}">
+                            التالي
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">لا توجد طلاب</h5>
+                <p class="text-muted">لم يتم العثور على طلاب مطابقين للبحث</p>
+                <a href="{% url 'fitness_management:add_student' %}" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>إضافة أول طالب
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

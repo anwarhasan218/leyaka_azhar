@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}الأخبار - المشروع القومي للياقة البدنية{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                <i class="fas fa-newspaper me-2"></i>الأخبار
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_authenticated and user.userprofile.user_type == 'super_admin' %}
+            <a href="{% url 'fitness_management:add_news' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>إضافة خبر جديد
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if page_obj %}
+    <div class="row">
+        {% for news in page_obj %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                {% if news.image %}
+                <img src="{{ news.image.url }}" class="card-img-top" alt="{{ news.title }}" style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ news.title }}</h5>
+                    <p class="card-text">{{ news.content|truncatewords:30 }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>{{ news.created_at|date:"Y/m/d" }}
+                        </small>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'fitness_management:news_detail' news.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i> عرض
+                            </a>
+                            {% if user.is_authenticated and user.userprofile.user_type == 'super_admin' %}
+                            <a href="{% url 'fitness_management:edit_news' news.id %}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> تعديل
+                            </a>
+                            <a href="{% url 'fitness_management:delete_news' news.id %}" class="btn btn-sm btn-danger" 
+                               onclick="return confirm('هل أنت متأكد من حذف هذا الخبر؟')">
+                                <i class="fas fa-trash"></i> حذف
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- الترقيم -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="صفحات الأخبار">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">السابق</a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+            </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">التالي</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">لا توجد أخبار</h5>
+        <p class="text-muted">لم يتم العثور على أخبار منشورة</p>
+        {% if user.is_authenticated and user.userprofile.user_type == 'super_admin' %}
+        <a href="{% url 'fitness_management:add_news' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>إضافة أول خبر
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

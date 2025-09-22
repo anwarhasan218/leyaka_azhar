@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.title }} - المشروع القومي للياقة البدنية{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                {% if event.image %}
+                <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="max-height: 400px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h2 class="card-title">{{ event.title }}</h2>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ event.location }}
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ event.start_date|date:"Y/m/d H:i" }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <span class="badge {% if event.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                            {% if event.is_active %}نشط{% else %}غير نشط{% endif %}
+                        </span>
+                        {% if user.is_authenticated and user.userprofile.user_type == 'super_admin' %}
+                        <div class="mt-2">
+                            <a href="{% url 'fitness_management:edit_event' event.id %}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>تعديل
+                            </a>
+                            <a href="{% url 'fitness_management:delete_event' event.id %}" class="btn btn-danger btn-sm" 
+                               onclick="return confirm('هل أنت متأكد من حذف هذه الفعالية؟')">
+                                <i class="fas fa-trash me-1"></i>حذف
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-text">
+                        {{ event.description|linebreaks }}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'fitness_management:events_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>العودة للفعاليات
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

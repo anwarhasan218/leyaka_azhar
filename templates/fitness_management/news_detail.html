@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ news.title }} - المشروع القومي للياقة البدنية{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                {% if news.image %}
+                <img src="{{ news.image.url }}" class="card-img-top" alt="{{ news.title }}" style="max-height: 400px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h2 class="card-title">{{ news.title }}</h2>
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>{{ news.created_at|date:"Y/m/d H:i" }}
+                        </small>
+                        {% if user.is_authenticated and user.userprofile.user_type == 'super_admin' %}
+                        <div class="mt-2">
+                            <a href="{% url 'fitness_management:edit_news' news.id %}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>تعديل
+                            </a>
+                            <a href="{% url 'fitness_management:delete_news' news.id %}" class="btn btn-danger btn-sm" 
+                               onclick="return confirm('هل أنت متأكد من حذف هذا الخبر؟')">
+                                <i class="fas fa-trash me-1"></i>حذف
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-text">
+                        {{ news.content|linebreaks }}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'fitness_management:news_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>العودة للأخبار
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

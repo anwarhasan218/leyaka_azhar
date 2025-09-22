@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}لوحة التحكم - المشروع القومي للياقة البدنية{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <i class="fas fa-tachometer-alt me-2"></i>مرحباً {{ user.get_full_name|default:user.username }}
+                    </h4>
+                    <p class="card-text">نوع المستخدم: {{ user_profile.get_user_type_display }}</p>
+                    {% if user_profile.region %}
+                    <p class="card-text">المنطقة: {{ user_profile.region.name }}</p>
+                    {% endif %}
+                    {% if user_profile.department %}
+                    <p class="card-text">الإدارة: {{ user_profile.department.name }}</p>
+                    {% endif %}
+                    {% if user_profile.institute %}
+                    <p class="card-text">المعهد: {{ user_profile.institute.name }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                    <h5 class="card-title">{{ students.count }}</h5>
+                    <p class="card-text">الطلاب</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-map-marker-alt fa-2x text-success mb-2"></i>
+                    <h5 class="card-title">{{ regions.count }}</h5>
+                    <p class="card-text">المناطق</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-building fa-2x text-warning mb-2"></i>
+                    <h5 class="card-title">{{ departments.count }}</h5>
+                    <p class="card-text">الإدارات</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-school fa-2x text-info mb-2"></i>
+                    <h5 class="card-title">{{ institutes.count }}</h5>
+                    <p class="card-text">المعاهد</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>إجراءات سريعة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'fitness_management:add_student' %}" class="btn btn-primary w-100">
+                                <i class="fas fa-user-plus me-2"></i>إضافة طالب
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'fitness_management:student_list' %}" class="btn btn-success w-100">
+                                <i class="fas fa-users me-2"></i>عرض الطلاب
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'fitness_management:reports' %}" class="btn btn-info w-100">
+                                <i class="fas fa-chart-bar me-2"></i>التقارير
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-warning w-100">
+                                <i class="fas fa-user-edit me-2"></i>الملف الشخصي
+                            </a>
+                        </div>
+                        {% if user_profile.user_type == 'super_admin' %}
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'fitness_management:add_region' %}" class="btn btn-primary w-100">
+                                <i class="fas fa-map-marker-alt me-2"></i>إضافة منطقة
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if user_profile.user_type == 'super_admin' or user_profile.user_type == 'region_admin' %}
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'fitness_management:add_department' %}" class="btn btn-success w-100">
+                                <i class="fas fa-building me-2"></i>إضافة إدارة
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if user_profile.user_type == 'super_admin' or user_profile.user_type == 'region_admin' or user_profile.user_type == 'department_admin' %}
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'fitness_management:add_institute' %}" class="btn btn-warning w-100">
+                                <i class="fas fa-school me-2"></i>إضافة معهد
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if user_profile.user_type == 'super_admin' %}
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'fitness_management:add_news' %}" class="btn btn-primary w-100">
+                                <i class="fas fa-newspaper me-2"></i>إضافة خبر
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'fitness_management:add_event' %}" class="btn btn-success w-100">
+                                <i class="fas fa-calendar me-2"></i>إضافة فعالية
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'fitness_management:add_video' %}" class="btn btn-warning w-100">
+                                <i class="fas fa-video me-2"></i>إضافة فيديو
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'fitness_management:add_training_unit' %}" class="btn btn-info w-100">
+                                <i class="fas fa-dumbbell me-2"></i>إضافة وحدة تدريبية
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'fitness_management:add_external_link' %}" class="btn btn-secondary w-100">
+                                <i class="fas fa-link me-2"></i>إضافة رابط
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Students -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>أحدث الطلاب المسجلين
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if students %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>الاسم</th>
+                                    <th>المرحلة</th>
+                                    <th>المعهد</th>
+                                    <th>تاريخ التسجيل</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students|slice:":5" %}
+                                <tr>
+                                    <td>{{ student.name }}</td>
+                                    <td>{{ student.get_education_level_display }}</td>
+                                    <td>{{ student.institute.name }}</td>
+                                    <td>{{ student.created_at|date:"Y/m/d" }}</td>
+                                    <td>
+                                        <a href="{% url 'fitness_management:student_detail' student.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">لا توجد طلاب مسجلين حالياً</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>معلومات سريعة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-calendar me-2 text-primary"></i>
+                            اليوم: {{ today|date:"Y/m/d" }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-clock me-2 text-success"></i>
+                            الوقت: {{ now|time:"H:i" }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-user me-2 text-warning"></i>
+                            نوع المستخدم: {{ user_profile.get_user_type_display }}
+                        </li>
+                        {% if user_profile.phone_number %}
+                        <li class="mb-2">
+                            <i class="fas fa-phone me-2 text-info"></i>
+                            الهاتف: {{ user_profile.phone_number }}
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-link me-2"></i>روابط سريعة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'fitness_management:news_list' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-newspaper me-2"></i>الأخبار
+                        </a>
+                        <a href="{% url 'fitness_management:events_list' %}" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-calendar me-2"></i>الفعاليات
+                        </a>
+                        <a href="{% url 'fitness_management:videos_list' %}" class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-video me-2"></i>الفيديوهات
+                        </a>
+                        <a href="{% url 'fitness_management:training_units_list' %}" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-graduation-cap me-2"></i>التدريب
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}الروابط الخارجية - المشروع القومي للياقة البدنية{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                <i class="fas fa-link me-2"></i>الروابط الخارجية
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_authenticated and user.userprofile.user_type == 'super_admin' %}
+            <a href="{% url 'fitness_management:add_external_link' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>إضافة رابط جديد
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if links %}
+    <div class="row">
+        {% for link in links %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ link.title }}</h5>
+                    {% if link.description %}
+                    <p class="card-text">{{ link.description|truncatewords:20 }}</p>
+                    {% endif %}
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ link.created_at|date:"Y/m/d" }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-info">رابط خارجي</span>
+                        <div class="btn-group" role="group">
+                            <a href="{{ link.url }}" target="_blank" class="btn btn-sm btn-primary">
+                                <i class="fas fa-external-link-alt"></i> زيارة
+                            </a>
+                            {% if user.is_authenticated and user.userprofile.user_type == 'super_admin' %}
+                            <a href="{% url 'fitness_management:edit_external_link' link.id %}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> تعديل
+                            </a>
+                            <a href="{% url 'fitness_management:delete_external_link' link.id %}" class="btn btn-sm btn-danger" 
+                               onclick="return confirm('هل أنت متأكد من حذف هذا الرابط؟')">
+                                <i class="fas fa-trash"></i> حذف
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-link fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">لا توجد روابط خارجية</h5>
+        <p class="text-muted">لم يتم العثور على روابط خارجية</p>
+        {% if user.is_authenticated and user.userprofile.user_type == 'super_admin' %}
+        <a href="{% url 'fitness_management:add_external_link' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>إضافة أول رابط
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

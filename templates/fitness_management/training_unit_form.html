@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+{% if form.instance.pk %}تعديل الوحدة التدريبية{% else %}إضافة وحدة تدريبية جديدة{% endif %} - المشروع القومي للياقة البدنية
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-dumbbell me-2"></i>
+                        {% if form.instance.pk %}تعديل الوحدة التدريبية{% else %}إضافة وحدة تدريبية جديدة{% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if form.instance.pk %}تحديث{% else %}إضافة{% endif %}
+                            </button>
+                            <a href="{% url 'fitness_management:training_units_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>العودة
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

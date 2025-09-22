@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+{% if form.instance.pk %}تعديل الإدارة{% else %}إضافة إدارة جديدة{% endif %} - المشروع القومي للياقة البدنية
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-building me-2"></i>
+                        {% if form.instance.pk %}تعديل الإدارة{% else %}إضافة إدارة جديدة{% endif %}
+                    </h3>
+                    {% if user_profile %}
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            {% if user_profile.user_type == 'super_admin' %}
+                                يمكنك إضافة أو تعديل أي إدارة في النظام
+                            {% elif user_profile.user_type == 'region_admin' %}
+                                يمكنك إضافة أو تعديل إدارات منطقتك: {{ user_profile.region.name }}
+                            {% else %}
+                                لا تملك الصلاحيات لإدارة الإدارات
+                            {% endif %}
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if form.instance.pk %}تحديث{% else %}إضافة{% endif %}
+                            </button>
+                            <a href="{% url 'fitness_management:department_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>العودة
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

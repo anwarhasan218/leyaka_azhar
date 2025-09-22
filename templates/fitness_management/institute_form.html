@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+{% if form.instance.pk %}تعديل المعهد{% else %}إضافة معهد جديد{% endif %} - المشروع القومي للياقة البدنية
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-school me-2"></i>
+                        {% if form.instance.pk %}تعديل المعهد{% else %}إضافة معهد جديد{% endif %}
+                    </h3>
+                    {% if user_profile %}
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            {% if user_profile.user_type == 'super_admin' %}
+                                يمكنك إضافة أو تعديل أي معهد في النظام
+                            {% elif user_profile.user_type == 'region_admin' %}
+                                يمكنك إضافة أو تعديل معاهد منطقتك: {{ user_profile.region.name }}
+                            {% elif user_profile.user_type == 'department_admin' %}
+                                يمكنك إضافة أو تعديل معاهد إدارتك: {{ user_profile.department.name }}
+                            {% else %}
+                                لا تملك الصلاحيات لإدارة المعاهد
+                            {% endif %}
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.region|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.department|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.code|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if form.instance.pk %}تحديث{% else %}إضافة{% endif %}
+                            </button>
+                            <a href="{% url 'fitness_management:institute_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>العودة
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const regionSelect = document.getElementById('id_region');
+    const departmentSelect = document.getElementById('id_department');
+    
+    console.log('Region Select:', regionSelect);
+    console.log('Department Select:', departmentSelect);
+    
+    if (!regionSelect || !departmentSelect) {
+        console.error('لم يتم العثور على حقول المنطقة أو الإدارة');
+        return;
+    }
+    
+    // تحديث الإدارات عند تغيير المنطقة
+    regionSelect.addEventListener('change', function() {
+        const regionId = this.value;
+        console.log('تم تغيير المنطقة إلى:', regionId);
+        
+        // إعادة تعيين الإدارة
+        departmentSelect.innerHTML = '<option value="">اختر الإدارة</option>';
+        
+        if (regionId) {
+            // إرسال طلب AJAX للحصول على الإدارات
+            const url = `/api/departments/${regionId}/`;
+            console.log('إرسال طلب إلى:', url);
+            
+            fetch(url)
+                .then(response => {
+                    console.log('استجابة الخادم:', response);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('بيانات الإدارات:', data);
+                    if (data.departments) {
+                        data.departments.forEach(dept => {
+                            const option = document.createElement('option');
+                            option.value = dept.id;
+                            option.textContent = `${dept.name} (${dept.code})`;
+                            departmentSelect.appendChild(option);
+                        });
+                        console.log(`تم إضافة ${data.departments.length} إدارة`);
+                    }
+                })
+                .catch(error => {
+                    console.error('خطأ في جلب الإدارات:', error);
+                });
+        }
+    });
+    
+    // تعيين القيم الأولية إذا كان التعديل
+    {% if form.instance.pk and form.instance.department %}
+        const initialRegionId = '{{ form.instance.department.region.id }}';
+        const initialDepartmentId = '{{ form.instance.department.id }}';
+        
+        if (initialRegionId && initialDepartmentId) {
+            // تحديث الإدارات أولاً
+            regionSelect.value = initialRegionId;
+            regionSelect.dispatchEvent(new Event('change'));
+            
+            // تعيين الإدارة بعد تحديث القائمة
+            setTimeout(() => {
+                departmentSelect.value = initialDepartmentId;
+            }, 100);
+        }
+    {% endif %}
+});
+</script>
+{% endblock %}

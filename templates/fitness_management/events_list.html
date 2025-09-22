@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}الفعاليات - المشروع القومي للياقة البدنية{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                <i class="fas fa-calendar-alt me-2"></i>الفعاليات والمسابقات
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_authenticated and user.userprofile.user_type == 'super_admin' %}
+            <a href="{% url 'fitness_management:add_event' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>إضافة فعالية جديدة
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if events %}
+    <div class="row">
+        {% for event in events %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                {% if event.image %}
+                <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text">{{ event.description|truncatewords:30 }}</p>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ event.location }}
+                            </small>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ event.start_date|date:"Y/m/d" }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge {% if event.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                            {% if event.is_active %}نشط{% else %}غير نشط{% endif %}
+                        </span>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'fitness_management:event_detail' event.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i> عرض
+                            </a>
+                            {% if user.is_authenticated and user.userprofile.user_type == 'super_admin' %}
+                            <a href="{% url 'fitness_management:edit_event' event.id %}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> تعديل
+                            </a>
+                            <a href="{% url 'fitness_management:delete_event' event.id %}" class="btn btn-sm btn-danger" 
+                               onclick="return confirm('هل أنت متأكد من حذف هذه الفعالية؟')">
+                                <i class="fas fa-trash"></i> حذف
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">لا توجد فعاليات</h5>
+        <p class="text-muted">لم يتم العثور على فعاليات نشطة</p>
+        {% if user.is_authenticated and user.userprofile.user_type == 'super_admin' %}
+        <a href="{% url 'fitness_management:add_event' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>إضافة أول فعالية
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

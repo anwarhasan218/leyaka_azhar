@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ unit.title }} - المشروع القومي للياقة البدنية{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">{{ unit.title }}</h2>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <i class="fas fa-graduation-cap me-1"></i>{{ unit.get_education_level_display }}
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ unit.created_at|date:"Y/m/d" }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <span class="badge bg-success">{{ unit.get_education_level_display }}</span>
+                        {% if user.is_authenticated and user.userprofile.user_type == 'super_admin' %}
+                        <div class="mt-2">
+                            <a href="{% url 'fitness_management:edit_training_unit' unit.id %}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>تعديل
+                            </a>
+                            <a href="{% url 'fitness_management:delete_training_unit' unit.id %}" class="btn btn-danger btn-sm" 
+                               onclick="return confirm('هل أنت متأكد من حذف هذه الوحدة التدريبية؟')">
+                                <i class="fas fa-trash me-1"></i>حذف
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-text">
+                        {{ unit.content|linebreaks }}
+                    </div>
+                    {% if unit.file %}
+                    <div class="mt-3">
+                        <a href="{{ unit.file.url }}" class="btn btn-info" target="_blank">
+                            <i class="fas fa-download me-2"></i>تحميل الملف المرفق
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'fitness_management:training_units_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>العودة للوحدات التدريبية
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

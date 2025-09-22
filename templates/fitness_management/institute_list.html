@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}قائمة المعاهد - المشروع القومي للياقة البدنية{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                <i class="fas fa-school me-2"></i>قائمة المعاهد
+            </h2>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.userprofile.user_type == 'super_admin' or user.userprofile.user_type == 'region_admin' or user.userprofile.user_type == 'department_admin' %}
+            <a href="{% url 'fitness_management:add_institute' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>إضافة معهد
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Institutes Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-table me-2"></i>المعاهد ({{ institutes.count }})
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if institutes %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>اسم المعهد</th>
+                            <th>الإدارة</th>
+                            <th>المنطقة</th>
+                            <th>رمز المعهد</th>
+                            <th>عدد الطلاب</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for institute in institutes %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-school text-primary me-2"></i>
+                                    {{ institute.name }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ institute.department.name }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ institute.department.region.name }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-dark">{{ institute.code }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-warning">{{ institute.student_set.count }}</span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    {% if user.userprofile.user_type == 'super_admin' or institute.department.region == user.userprofile.region or institute.department == user.userprofile.department %}
+                                    <a href="{% url 'fitness_management:edit_institute' institute.id %}" 
+                                       class="btn btn-sm btn-warning" title="تعديل المعهد">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'fitness_management:delete_institute' institute.id %}" 
+                                       class="btn btn-sm btn-danger" title="حذف المعهد"
+                                       onclick="return confirm('هل أنت متأكد من حذف هذا المعهد؟')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-school fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">لا توجد معاهد</h5>
+                <p class="text-muted">لم يتم العثور على معاهد</p>
+                {% if user.userprofile.user_type == 'super_admin' or user.userprofile.user_type == 'region_admin' or user.userprofile.user_type == 'department_admin' %}
+                <a href="{% url 'fitness_management:add_institute' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>إضافة أول معهد
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

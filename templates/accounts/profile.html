@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}الملف الشخصي - المشروع القومي للياقة البدنية{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-user me-2"></i>الملف الشخصي
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.user_type|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.phone_number|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        {% if user.userprofile.user_type == 'region_admin' %}
+                        <div class="row">
+                            <div class="col-md-12">
+                                {{ form.region|as_crispy_field }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.userprofile.user_type == 'department_admin' %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.region|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.department|as_crispy_field }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.userprofile.user_type == 'institute_admin' %}
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ form.region|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.department|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.institute|as_crispy_field }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>حفظ التغييرات
+                            </button>
+                            <a href="{% url 'fitness_management:dashboard' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>العودة للوحة التحكم
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

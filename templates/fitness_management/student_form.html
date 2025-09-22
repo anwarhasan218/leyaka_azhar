@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+{% if form.instance.pk %}تعديل الطالب{% else %}إضافة طالب جديد{% endif %} - المشروع القومي للياقة البدنية
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-user me-2"></i>
+                        {% if form.instance.pk %}تعديل الطالب{% else %}إضافة طالب جديد{% endif %}
+                    </h3>
+                    {% if user_profile %}
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            {% if user_profile.user_type == 'super_admin' %}
+                                يمكنك إضافة طالب لأي معهد في النظام
+                            {% elif user_profile.user_type == 'region_admin' %}
+                                يمكنك إضافة طالب لأي معهد في منطقتك: {{ user_profile.region.name }}
+                            {% elif user_profile.user_type == 'department_admin' %}
+                                يمكنك إضافة طالب لأي معهد في إدارتك: {{ user_profile.department.name }}
+                            {% elif user_profile.user_type == 'institute_admin' %}
+                                يمكنك إضافة طالب لمعهدك: {{ user_profile.institute.name }}
+                            {% endif %}
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.region|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.department|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.national_id|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.gender|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.education_level|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.grade|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.institute|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.academic_year|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.phone_number|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.personal_photo|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.birth_certificate|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if form.instance.pk %}تحديث{% else %}إضافة{% endif %}
+                            </button>
+                            <a href="{% url 'fitness_management:student_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>العودة
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const regionSelect = document.getElementById('id_region');
+    const departmentSelect = document.getElementById('id_department');
+    const instituteSelect = document.getElementById('id_institute');
+    
+    console.log('Region Select:', regionSelect);
+    console.log('Department Select:', departmentSelect);
+    console.log('Institute Select:', instituteSelect);
+    
+    if (!regionSelect || !departmentSelect || !instituteSelect) {
+        console.error('لم يتم العثور على حقول المنطقة أو الإدارة أو المعهد');
+        return;
+    }
+    
+    // تحديث الإدارات عند تغيير المنطقة
+    regionSelect.addEventListener('change', function() {
+        const regionId = this.value;
+        console.log('تم تغيير المنطقة إلى:', regionId);
+        
+        // إعادة تعيين الإدارة والمعهد
+        departmentSelect.innerHTML = '<option value="">اختر الإدارة</option>';
+        instituteSelect.innerHTML = '<option value="">اختر المعهد</option>';
+        
+        if (regionId) {
+            // إرسال طلب AJAX للحصول على الإدارات
+            const url = `/api/departments/${regionId}/`;
+            console.log('إرسال طلب إلى:', url);
+            
+            fetch(url)
+                .then(response => {
+                    console.log('استجابة الخادم:', response);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('بيانات الإدارات:', data);
+                    if (data.departments) {
+                        data.departments.forEach(dept => {
+                            const option = document.createElement('option');
+                            option.value = dept.id;
+                            option.textContent = `${dept.name} (${dept.code})`;
+                            departmentSelect.appendChild(option);
+                        });
+                        console.log(`تم إضافة ${data.departments.length} إدارة`);
+                    }
+                })
+                .catch(error => {
+                    console.error('خطأ في جلب الإدارات:', error);
+                });
+        }
+    });
+    
+    // تحديث المعاهد عند تغيير الإدارة
+    departmentSelect.addEventListener('change', function() {
+        const departmentId = this.value;
+        console.log('تم تغيير الإدارة إلى:', departmentId);
+        
+        // إعادة تعيين المعهد
+        instituteSelect.innerHTML = '<option value="">اختر المعهد</option>';
+        
+        if (departmentId) {
+            // إرسال طلب AJAX للحصول على المعاهد
+            const url = `/api/institutes/${departmentId}/`;
+            console.log('إرسال طلب إلى:', url);
+            
+            fetch(url)
+                .then(response => {
+                    console.log('استجابة الخادم:', response);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('بيانات المعاهد:', data);
+                    if (data.institutes) {
+                        data.institutes.forEach(inst => {
+                            const option = document.createElement('option');
+                            option.value = inst.id;
+                            option.textContent = `${inst.name} (${inst.code})`;
+                            instituteSelect.appendChild(option);
+                        });
+                        console.log(`تم إضافة ${data.institutes.length} معهد`);
+                    }
+                })
+                .catch(error => {
+                    console.error('خطأ في جلب المعاهد:', error);
+                });
+        }
+    });
+    
+    // تعيين القيم الأولية إذا كان التعديل
+    {% if form.instance.pk and form.instance.institute %}
+        const initialRegionId = '{{ form.instance.institute.department.region.id }}';
+        const initialDepartmentId = '{{ form.instance.institute.department.id }}';
+        const initialInstituteId = '{{ form.instance.institute.id }}';
+        
+        if (initialRegionId && initialDepartmentId && initialInstituteId) {
+            // تحديث الإدارات أولاً
+            regionSelect.value = initialRegionId;
+            regionSelect.dispatchEvent(new Event('change'));
+            
+            // تحديث المعاهد بعد تحديث الإدارات
+            setTimeout(() => {
+                departmentSelect.value = initialDepartmentId;
+                departmentSelect.dispatchEvent(new Event('change'));
+                
+                // تعيين المعهد بعد تحديث القائمة
+                setTimeout(() => {
+                    instituteSelect.value = initialInstituteId;
+                }, 100);
+            }, 100);
+        }
+    {% endif %}
+});
+</script>
+{% endblock %}

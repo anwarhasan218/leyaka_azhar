@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ student.name }} - تفاصيل الطالب{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3>
+                            <i class="fas fa-user me-2"></i>تفاصيل الطالب
+                        </h3>
+                        {% if user.userprofile.user_type == 'institute_admin' %}
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'fitness_management:edit_student' student.id %}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>تعديل
+                            </a>
+                            <a href="{% url 'fitness_management:delete_student' student.id %}" class="btn btn-danger btn-sm" 
+                               onclick="return confirm('هل أنت متأكد من حذف هذا الطالب؟')">
+                                <i class="fas fa-trash me-1"></i>حذف
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            {% if student.personal_photo %}
+                            <img src="{{ student.personal_photo.url }}" alt="{{ student.name }}" 
+                                 class="img-fluid rounded" style="max-width: 200px;">
+                            {% else %}
+                            <div class="bg-secondary rounded d-flex align-items-center justify-content-center mx-auto" 
+                                 style="width: 200px; height: 200px;">
+                                <i class="fas fa-user fa-3x text-white"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h4>{{ student.name }}</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>الرقم القومي:</strong> {{ student.national_id }}</p>
+                                    <p><strong>النوع:</strong> 
+                                        <span class="badge {% if student.gender == 'male' %}bg-primary{% else %}bg-pink{% endif %}">
+                                            {{ student.get_gender_display }}
+                                        </span>
+                                    </p>
+                                    <p><strong>المرحلة التعليمية:</strong> 
+                                        <span class="badge bg-info">{{ student.get_education_level_display }}</span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>الصف:</strong> {{ student.grade }}</p>
+                                    <p><strong>المعهد:</strong> {{ student.institute.name }}</p>
+                                    <p><strong>رقم الهاتف:</strong> {{ student.phone_number|default:"غير محدد" }}</p>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <p><strong>تاريخ التسجيل:</strong> {{ student.created_at|date:"Y/m/d" }}</p>
+                                {% if student.birth_certificate %}
+                                <a href="{{ student.birth_certificate.url }}" class="btn btn-info btn-sm" target="_blank">
+                                    <i class="fas fa-download me-1"></i>تحميل شهادة الميلاد
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الاختبارات -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-clipboard-list me-2"></i>الاختبارات</h5>
+                        {% if user.userprofile.user_type == 'institute_admin' %}
+                        <a href="{% url 'fitness_management:add_student_test' student.id %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus me-1"></i>إضافة اختبار
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if tests %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>الاختبار</th>
+                                    <th>الدرجة</th>
+                                    <th>التاريخ</th>
+                                    <th>ملاحظات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for test in tests %}
+                                <tr>
+                                    <td>{{ test.test.name }}</td>
+                                    <td>
+                                        <span class="badge {% if test.score >= 80 %}bg-success{% elif test.score >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ test.score }}
+                                        </span>
+                                    </td>
+                                    <td>{{ test.test_date|date:"Y/m/d" }}</td>
+                                    <td>{{ test.notes|default:"-" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-clipboard-list fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">لا توجد اختبارات مسجلة لهذا الطالب</p>
+                        {% if user.userprofile.user_type == 'institute_admin' %}
+                        <a href="{% url 'fitness_management:add_student_test' student.id %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>إضافة أول اختبار
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'fitness_management:student_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>العودة لقائمة الطلاب
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
